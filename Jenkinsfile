@@ -12,7 +12,6 @@ spec:
         value: ""
 ''') {
     node(POD_LABEL) {
-        git 'https://github.com/ast9501/nodejs-docs-hello-world.git'
         container('docker') {
             sh 'docker version && docker build -t nodejs-demo .'
         }
