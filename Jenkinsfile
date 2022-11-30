@@ -12,9 +12,13 @@ spec:
         value: ""
 ''') {
     node(POD_LABEL) {
-        container('docker') {
-            git branch: 'main', url: 'https://github.com/ast9501/nodejs-docs-hello-world.git'
-            sh 'docker version && docker build -t nodejs-demo .'
-        }
+      stage ('CI flow') {
+          container('docker') {
+            stage ('Build image') {
+                git branch: 'main', url: 'https://github.com/ast9501/nodejs-docs-hello-world.git'
+                sh 'docker version && docker build -t nodejs-demo .'
+            }
+          }
+      }
     }
 }
