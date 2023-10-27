@@ -19,6 +19,7 @@ Simple Jenkinsfile for demo CI pipeline:
 - Clone repo
 - Build image
 - Push image
+
 Pipeline will call pre-defined pod template (labeled in `jenkins-docker`) to build/push image.
 
 ### Variable within build stage
