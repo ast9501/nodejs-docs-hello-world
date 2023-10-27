@@ -1,24 +1,40 @@
-podTemplate(yaml: '''
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: docker
-    image: docker:19.03.1-dind
-    securityContext:
-      privileged: true
-    env:
-      - name: DOCKER_TLS_CERTDIR
-        value: ""
-''') {
-    node(POD_LABEL) {
-      stage ('CI flow') {
-          container('docker') {
-            stage ('Build image') {
+pipeline {
+    options {
+        disableConcurrentBuilds()
+    }
+    agent {
+        kubernetes {
+            label 'jenkins-docker'
+        }
+    }
+    stages {
+        stage('Checkout') {
+            steps {
                 git branch: 'main', url: 'https://github.com/ast9501/nodejs-docs-hello-world.git'
-                sh 'docker version && docker build -t nodejs-demo .'
             }
-          }
-      }
+        }
+        stage('Docker Build') {
+            steps {
+                container('docker') {
+                    //docker.withRegistry(credentialsId: '343a1072-edd3-4e77-aeec-c89c82f5e2f5') {
+                    sh 'docker version && docker build -t alan0415/nodejs-demo .'
+                }
+            }
+        }
+        stage ('Docker Push') {
+            steps {
+                container('docker') {withCredentials([
+                usernamePassword(
+                  credentialsId: env.DOCKER_CREDENDITIAL,
+                  usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASS'
+                )]) {
+                    sh """
+                    echo ${REGISTRY_PASS} | docker login https://index.docker.io/v1/ -u ${REGISTRY_USER} --password-stdin
+                    docker push alan0415/nodejs-demo
+                    """
+                    }
+                }
+            }
+        }
     }
 }
